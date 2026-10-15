@@ -3893,6 +3893,38 @@ paths:
                   message:
                     type: string
                     example: Visible DM channels retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channel_id:
+                          type: string
+                          format: uuid
+                          description: The unique identifier of the DM channel
+                        username:
+                          type: string
+                          description: The username or display name of the participant(s)
+                        participant_id:
+                          type: string
+                          format: uuid
+                          description: The ID of the participant (for DM) or empty for group DM
+                        participant_email:
+                          type: string
+                          description: The email of the participant
+                        avatar_url:
+                          type: string
+                          description: The avatar URL of the participant
+                        default_avatar_url:
+                          type: string
+                          description: The avatar URL of the participant
+                        channel_type:
+                          type: string
+                          enum: [dm, group_dm]
+                          description: The type of channel (dm or group_dm)
+                        is_favourite:
+                          type: boolean
+                          description: Whether this channel is in the user's favourites
 
   /organisations/{organisation_id}/user-not-channels:
 
