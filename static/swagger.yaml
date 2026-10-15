@@ -3718,6 +3718,10 @@ paths:
                         access:
                           type: boolean
                           example: true
+                        is_favourite:
+                          type: boolean
+                          description: Whether the authenticated user has favourited this channel.
+                          example: false
                         member_avatars:
                           type: array
                           items:
@@ -4820,6 +4824,80 @@ paths:
                   message:
                     type: string
                     example: permission denied
+
+  /channels/{channel_id}/favourite:
+    put:
+      summary: Favourite or unfavourite a channel
+      description: Sets whether the authenticated user has favourited the channel. The favourite is private to the user and is returned as `is_favourite` by the user channels endpoint. The request is idempotent.
+      security:
+        - bearerAuth: []
+      tags:
+        - channels
+      parameters:
+        - name: channel_id
+          in: path
+          required: true
+          description: The ID of the channel to favourite or unfavourite.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_favourite:
+                  type: boolean
+                  description: Set to `true` to favourite the channel, `false` to remove it from favourites.
+              required:
+                - is_favourite
+              example:
+                is_favourite: true
+      responses:
+        "200":
+          description: Favourite status saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: added channel to favourites
+                  data:
+                    type: object
+                    properties:
+                      is_favourite:
+                        type: boolean
+                        example: true
+        "400":
+          description: Invalid channel id or request body
+        "403":
+          description: The user is not a member of the channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  status_code:
+                    type: integer
+                    example: 403
+                  message:
+                    type: string
+                    example: user not in channel
+        "422":
+          description: Validation failed (is_favourite is required)
 
   /channels/{channel_id}/export:
     post:

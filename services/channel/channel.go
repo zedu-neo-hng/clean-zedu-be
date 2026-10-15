@@ -667,3 +667,17 @@ func ToggleUserJoinedMessage(db *gorm.DB, channelId string, req models.ToggleJoi
 
 	return updated, http.StatusOK, nil
 }
+
+func SetFavouriteChannel(db *gorm.DB, channelId, userId string, favourite bool) (int, error) {
+	var uc models.UserChannels
+
+	if err := uc.UserInChannels(db, channelId, userId); err != nil {
+		return http.StatusForbidden, err
+	}
+
+	if err := uc.SetFavourite(db, channelId, userId, favourite); err != nil {
+		return http.StatusInternalServerError, errors.New("failed to update channel favourite: " + err.Error())
+	}
+
+	return http.StatusOK, nil
+}

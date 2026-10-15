@@ -38,6 +38,7 @@ func Channels(r *gin.Engine, ApiVersion string, validator *validator.Validate, d
 		channelUrl.PUT("/:channelId/messages", channel.EditChannelsMsg)
 		channelUrl.PUT("/:channelId/archive", channel.ArchiveChannel)
 		channelUrl.PUT("/:channelId/toggle-user-joined-message", channel.ToggleUserJoinedMessage)
+		channelUrl.PUT("/:channelId/favourite", channel.SetFavouriteChannel)
 
 		// DELETE routes
 		channelUrl.DELETE("/:channelId/messages/:messageId", channel.DeleteChannelsMsg)

@@ -60,6 +60,7 @@ type UserChannels struct {
 	DeletedAt    time.Time              `gorm:"index" json:"deleted_at"`
 	Preferences  NotificationPreference `gorm:"type:jsonb;not null;default:'{}'" json:"preferences"`
 	Restricted   bool                   `gorm:"column:restricted;default:false" json:"restricted"`
+	IsFavourite  bool                   `gorm:"column:is_favourite;not null;default:false" json:"is_favourite"`
 	OrgId        string                 `gorm:"-" json:"-"`
 }
 
@@ -139,7 +140,12 @@ type GetUserChannelResp []struct {
 	PreviewMessage string          `json:"preview_message"`
 	LastReadAt     time.Time       `json:"last_read_at"`
 	Restricted     bool            `json:"restricted"`
+	IsFavourite    bool            `json:"is_favourite"`
 	Payload        *MessagePayload `gorm:"-" json:"payload,omitempty"`
+}
+
+type FavouriteChannelReq struct {
+	IsFavourite *bool `json:"is_favourite" validate:"required"`
 }
 
 type RestrictUserReq struct {
@@ -897,6 +903,12 @@ func (c *UserChannels) UserInChannels(db *gorm.DB, channelID, userID string) err
 	return nil
 }
 
+func (uc *UserChannels) SetFavourite(db *gorm.DB, channelID, userID string, favourite bool) error {
+	return db.Model(&UserChannels{}).
+		Where("channels_id = ? AND user_id = ?", channelID, userID).
+		Update("is_favourite", favourite).Error
+}
+
 func (r *Channels) UpdateChannels(db *gorm.DB, req UpdateChannelsRequest, userId string) (Channels, int, error) {
 	var (
 		channel Channels
@@ -1193,7 +1205,7 @@ func (uc *UserChannels) GetUserChannels(base *storage.Database, ids IDS) (GetUse
 	chanResp := make(GetUserChannelResp, 0)
 
 	query := db.Model(&Channels{}).
-		Select("channels.id, channels.name, channels.description, channels.organisation_id, channels.is_private, channels.is_restricted, channels.owner_id, channels.archived, channels.group_id, channels.created_at, uc.mention_count, uc.thread_count, uc.last_thread_id, uc.restricted, 'true' AS access").
+		Select("channels.id, channels.name, channels.description, channels.organisation_id, channels.is_private, channels.is_restricted, channels.owner_id, channels.archived, channels.group_id, channels.created_at, uc.mention_count, uc.thread_count, uc.last_thread_id, uc.restricted, uc.is_favourite, 'true' AS access").
 		Joins("JOIN user_channels AS uc ON channels.id = uc.channels_id").
 		Where("channels.organisation_id = ? AND uc.user_id = ? AND channels.archived = FALSE", ids.OrganisationID, ids.UserID)
 
