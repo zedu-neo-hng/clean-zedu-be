@@ -471,6 +471,17 @@ func GetVisibleDmChannels(req models.DmChannels, db *storage.Database, c *gin.Co
 	if err != nil {
 		return nil, paginationResp, http.StatusInternalServerError, err
 	}
+
+	favouriteChannelIds, _ := models.GetUserFavouriteChannelIds(db.Postgresql, req.UserId, req.OrgId)
+	favouriteMap := make(map[string]bool)
+	for _, id := range favouriteChannelIds {
+		favouriteMap[id] = true
+	}
+
+	for i := range dmChansResp {
+		dmChansResp[i].IsFavourite = favouriteMap[dmChansResp[i].ID]
+	}
+
 	return dmChansResp, paginationResp, http.StatusOK, nil
 }
 
